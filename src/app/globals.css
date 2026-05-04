@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0a0a0a;
+  --card: #141414;
+  --border: #2a2a2a;
+  --red: #dc2626;
+  --red-dark: #991b1b;
+  --red-light: #ef4444;
+  --text: #f0f0f0;
+  --muted: #888888;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--red-dark);
+}
+
+.horror-title {
+  font-family: Georgia, serif;
+  letter-spacing: 0.05em;
+}
+
+.btn-red {
+  @apply bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors;
+}
+
+.btn-ghost {
+  @apply border border-horror-border text-horror-muted hover:text-horror-text hover:border-horror-red py-2 px-4 rounded transition-colors;
+}
+
+.card {
+  @apply bg-horror-card border border-horror-border rounded-lg p-4;
+}
+
+.input-horror {
+  @apply bg-[#1a1a1a] border border-horror-border text-horror-text rounded px-3 py-2 w-full focus:outline-none focus:border-horror-red transition-colors;
+}
+
+.label-horror {
+  @apply text-sm text-horror-muted mb-1 block;
+}
+
+textarea.input-horror {
+  resize: vertical;
+  min-height: 100px;
+}

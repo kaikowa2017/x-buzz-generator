@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model History {
+  id        String   @id @default(cuid())
+  userId    String   @default("owner")
+  type      String
+  title     String
+  input     String
+  output    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model BuzzPost {
+  id                String   @id @default(cuid())
+  userId            String   @default("owner")
+  text              String
+  likes             Int      @default(0)
+  impressions       Int      @default(0)
+  genre             String   @default("")
+  memo              String   @default("")
+  hook              String   @default("")
+  charCount         Int      @default(0)
+  lineBreakCount    Int      @default(0)
+  hasQuestion       Boolean  @default(false)
+  onomatopoeiaCount Int      @default(0)
+  emotionWords      String   @default("[]")
+  hasCommentPrompt  Boolean  @default(false)
+  hasFollowPrompt   Boolean  @default(false)
+  styleSummary      String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model ReferenceAccount {
+  id        String          @id @default(cuid())
+  userId    String          @default("owner")
+  name      String
+  xId       String
+  genre     String          @default("")
+  reason    String          @default("")
+  memo      String          @default("")
+  posts     ReferencePost[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+model ReferencePost {
+  id        String           @id @default(cuid())
+  userId    String           @default("owner")
+  accountId String
+  account   ReferenceAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([accountId])
+}
+
+model StylePreset {
+  id          String   @id @default(cuid())
+  userId      String   @default("owner")
+  name        String
+  description String   @default("")
+  sourceType  String   @default("manual")
+  sourceId    String   @default("")
+  features    String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Pattern {
+  id        String   @id @default(cuid())
+  userId    String   @default("owner")
+  name      String
+  type      String
+  value     String
+  weight    Float    @default(1.0)
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model PostTemplate {
+  id        String   @id @default(cuid())
+  userId    String   @default("owner")
+  name      String
+  structure String
+  example   String
+  score     Int      @default(0)
+  tags      String   @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
