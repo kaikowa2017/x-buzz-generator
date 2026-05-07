@@ -78,7 +78,7 @@ export async function GET() {
   checks.push({
     name: "分析 → 学習パターン更新",
     ok:   patternsA.length >= 3 && hasHighWeight && hasRising,
-    detail: `✓ アカウントA: ${patternsA.length}パターン (高weight: ${patternsA.filter(p => p.weight >= 2).length}件, rising: ${patternsA.filter(p => p.trend === "rising").length}件, declining: ${patternsA.filter(p => p.trend === "declining").length}件)`,
+    detail: `✓ アカウントA: ${patternsA.length}パターン (高weight: ${patternsA.filter((p: any) => p.weight >= 2)).length}件, rising: ${patternsA.filter(p => p.trend === "rising").length}件, declining: ${patternsA.filter(p => p.trend === "declining").length}件)`,
     data: patternsA.map((p) => ({
       pattern:     p.pattern.split(/[：:]/)[0].trim(),
       weight:      p.weight,
