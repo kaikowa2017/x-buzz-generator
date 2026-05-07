@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     take: 500,
   });
 
-  const records = metrics.map((m) => ({
+  const records = metrics.map((m: any) => ({
     postId: m.postId,
     content: m.post.content,
     likes: m.likes,
