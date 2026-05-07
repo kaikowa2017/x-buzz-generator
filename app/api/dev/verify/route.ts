@@ -104,7 +104,7 @@ export async function GET() {
       ? `✓ トップパターン「${topPattern?.pattern.split(/[：:]/)[0]}」(weight ${topWeight.toFixed(1)}) が生成時に注入されます`
       : "✗ 十分な重みのパターンがありません",
     data: {
-      topPatterns: patternsA.slice(0, 3).map((p) => ({
+      topPatterns: patternsA.slice(0, 3).map((p: any) => ({
         pattern: p.pattern.split(/[：:]/)[0],
         weight:  p.weight,
       })),
