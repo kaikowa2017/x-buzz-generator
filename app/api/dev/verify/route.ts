@@ -14,7 +14,7 @@ export async function GET() {
   // ── 1. アカウント存在確認 ─────────────────────────────────────
   const accounts = await prisma.account.findMany({ orderBy: { createdAt: "asc" } });
   const accountA = accounts.find((a: any) => a.handle === "horror_test");
-const accountB = accounts.find((a: any) => a.handle === "biz_test");
+  const accountB = accounts.find((a: any) => a.handle === "biz_test");
 
   checks.push({
     name: "アカウント作成",
@@ -50,8 +50,8 @@ const accountB = accounts.find((a: any) => a.handle === "biz_test");
   const metricsA = await prisma.postMetric.findMany({ where: { accountId: accountA.id } });
   const metricsB = await prisma.postMetric.findMany({ where: { accountId: accountB.id } });
 
-  const anyStrong = metricsA.some((m) => (m.engagementRate ?? 0) >= 3);
-  const anyWeak   = metricsA.some((m) => (m.engagementRate ?? 0) < 1);
+  const anyStrong = metricsA.some((m: any) => (m.engagementRate ?? 0) >= 3);
+  const anyWeak = metricsA.some((m: any) => (m.engagementRate ?? 0) < 1);
 
   checks.push({
     name: "数値入力 → 分析",
