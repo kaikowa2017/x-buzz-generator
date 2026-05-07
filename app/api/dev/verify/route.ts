@@ -13,8 +13,8 @@ export async function GET() {
 
   // ── 1. アカウント存在確認 ─────────────────────────────────────
   const accounts = await prisma.account.findMany({ orderBy: { createdAt: "asc" } });
-  const accountA = accounts.find((a) => a.handle === "horror_test");
-  const accountB = accounts.find((a) => a.handle === "biz_test");
+  const accountA = accounts.find((a: any) => a.handle === "horror_test");
+const accountB = accounts.find((a: any) => a.handle === "biz_test");
 
   checks.push({
     name: "アカウント作成",
