@@ -70,11 +70,10 @@ export async function GET() {
   const patternsA = await prisma.learningPattern.findMany({ where: { accountId: accountA.id }, orderBy: { weight: "desc" } });
   const patternsB = await prisma.learningPattern.findMany({ where: { accountId: accountB.id }, orderBy: { weight: "desc" } });
 
-  const hasHighWeight  = patternsA.some((p) => p.weight >= 2.0);
-  const hasLowWeight   = patternsA.some((p) => p.weight < 1.0);
-  const hasRising      = patternsA.some((p) => p.trend === "rising");
-  const hasDeclining   = patternsA.some((p) => p.trend === "declining");
-  const abIsolated     = !patternsA.some((p) => patternsB.some((q) => q.id === p.id));
+  const hasHighWeight = patternsA.some((p: any) => p.weight >= 2.0);
+  const hasLowWeight = patternsA.some((p: any) => p.weight < 1.0);
+  const hasRising = patternsA.some((p: any) => p.trend === "rising");
+  const hasDeclining = patternsA.some((p: any) => p.trend === "declining");
 
   checks.push({
     name: "分析 → 学習パターン更新",
