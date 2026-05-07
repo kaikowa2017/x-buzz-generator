@@ -22,7 +22,7 @@ const accountB = accounts.find((a: any) => a.handle === "biz_test");
     detail: accountA && accountB
       ? `✓ ${accountA.name} / ${accountB.name} (計${accounts.length}件)`
       : "✗ テストアカウントが見つかりません。シードを実行してください。",
-    data: accounts.map((a) => ({ id: a.id, name: a.name, isActive: a.isActive })),
+    data: accounts.map((a: any) => ({ id: a.id, name: a.name, isActive: a.isActive })),
   });
 
   if (!accountA || !accountB) {
