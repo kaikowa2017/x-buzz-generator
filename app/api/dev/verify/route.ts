@@ -37,7 +37,7 @@ const accountB = accounts.find((a: any) => a.handle === "biz_test");
     name: "投稿生成 → 保存",
     ok:   postsA.length >= 3 && postsB.length >= 1,
     detail: `✓ アカウントA: ${postsA.length}件 / アカウントB: ${postsB.length}件`,
-    data: postsA.map((p) => ({
+    data: postsA.map((p: any) => ({
       postType: p.postType,
       status: p.status,
       hasImagePrompt: !!p.imagePrompt,
