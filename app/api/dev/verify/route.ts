@@ -57,7 +57,7 @@ export async function GET() {
     name: "数値入力 → 分析",
     ok:   metricsA.length >= 2 && anyStrong,
     detail: `✓ アカウントA: ${metricsA.length}件 (強ER: ${anyStrong ? "あり" : "なし"}, 弱ER: ${anyWeak ? "あり" : "なし"}) / B: ${metricsB.length}件`,
-    data: metricsA.map((m) => ({
+    data: metricsA.map((m: any) => ({
       impressions: m.impressions,
       likes:       m.likes,
       replies:     m.replies,
