@@ -1,65 +1,112 @@
-import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
+export default async function DashboardPage() {
+  const [postCount, accountCount, genreCount, buzzCount, recentPosts] = await Promise.all([
+    prisma.post.count(),
+    prisma.account.count(),
+    prisma.genre.count(),
+    prisma.buzzPost.count(),
+    prisma.post.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      include: {
+        account: { select: { name: true } },
+        genre: { select: { name: true } },
+        metrics: { orderBy: { recordedAt: "desc" }, take: 1 },
+      },
+    }),
+  ]);
+
+  const cards = [
+    { label: "総投稿数", value: postCount, href: "/history", color: "blue" },
+    { label: "アカウント数", value: accountCount, href: "/accounts", color: "purple" },
+    { label: "ジャンル数", value: genreCount, href: "/genres", color: "green" },
+    { label: "バズ分析数", value: buzzCount, href: "/buzz", color: "orange" },
+  ];
+
+  const colorMap: Record<string, string> = {
+    blue: "border-blue-500/30 text-blue-400",
+    purple: "border-purple-500/30 text-purple-400",
+    green: "border-green-500/30 text-green-400",
+    orange: "border-orange-500/30 text-orange-400",
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold">ダッシュボード</h1>
+        <p className="text-zinc-500 text-sm mt-1">X投稿の生成・分析・最適化</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {cards.map(({ label, value, href, color }) => (
+          <Link
+            key={label}
+            href={href}
+            className={`bg-zinc-900 border rounded-lg p-4 hover:bg-zinc-800 transition-colors ${colorMap[color]}`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="text-3xl font-bold">{value}</div>
+            <div className="text-zinc-400 text-sm mt-1">{label}</div>
+          </Link>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold">クイックアクション</h2>
+          </div>
+          <div className="space-y-2">
+            {[
+              { href: "/generate", label: "投稿文を生成する", desc: "テーマを入力して3案を生成" },
+              { href: "/image-prompts", label: "画像プロンプトを生成", desc: "4ツール対応" },
+              { href: "/video-prompts", label: "動画プロンプトを生成", desc: "Runway/Pika/Kling/Sora" },
+              { href: "/buzz", label: "バズ投稿を分析する", desc: "URLまたは手動入力" },
+              { href: "/metrics", label: "数値を入力する", desc: "エンゲージメントを記録" },
+            ].map(({ href, label, desc }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center justify-between p-3 rounded-md bg-zinc-800 hover:bg-zinc-700 transition-colors"
+              >
+                <div>
+                  <div className="text-sm font-medium">{label}</div>
+                  <div className="text-xs text-zinc-500">{desc}</div>
+                </div>
+                <span className="text-zinc-600">→</span>
+              </Link>
+            ))}
+          </div>
         </div>
-      </main>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+          <h2 className="font-semibold mb-4">最近の投稿</h2>
+          {recentPosts.length === 0 ? (
+            <p className="text-zinc-500 text-sm">投稿がありません。</p>
+          ) : (
+            <div className="space-y-3">
+              {recentPosts.map((post) => {
+                const metric = post.metrics[0];
+                const er = metric?.engagementRate;
+                return (
+                  <div key={post.id} className="text-sm border-b border-zinc-800 pb-3 last:border-0 last:pb-0">
+                    <div className="text-zinc-300 line-clamp-2">{post.content}</div>
+                    <div className="flex gap-3 mt-1 text-xs text-zinc-600">
+                      <span>{post.account.name}</span>
+                      {post.genre && <span>{post.genre.name}</span>}
+                      <span className={`px-1.5 py-0.5 rounded text-xs ${
+                        post.status === "posted" ? "bg-green-900/50 text-green-400" : "bg-zinc-800 text-zinc-500"
+                      }`}>{post.status}</span>
+                      {er != null && <span className="text-blue-400">ER: {Number(er).toFixed(2)}%</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

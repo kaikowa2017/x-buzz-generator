@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Account {
+  id        String   @id @default(cuid())
+  name      String
+  handle    String   @unique
+  bio       String?
+  style     String?
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts    Post[]
+  metrics  PostMetric[]
+  buzzPosts BuzzPost[]
+  patterns LearningPattern[]
+  genres   AccountGenre[]
+  ngWords  AccountNGWord[]
+}
+
+model Genre {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  rules       String?
+  examples    String?
+  createdAt   DateTime @default(now())
+
+  posts    Post[]
+  patterns LearningPattern[]
+  accounts AccountGenre[]
+}
+
+model AccountGenre {
+  accountId String
+  genreId   String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  genre     Genre   @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([accountId, genreId])
+}
+
+model Post {
+  id           String    @id @default(cuid())
+  accountId    String
+  genreId      String?
+  content      String
+  imagePrompt  String?
+  videoPrompt  String?
+  status       String    @default("draft")
+  score        Float?
+  postType     String?
+  usedPatterns   String?
+  isTemplate     Boolean   @default(false)
+  templateTitle  String?
+  postedAt       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  account Account  @relation(fields: [accountId], references: [id])
+  genre   Genre?   @relation(fields: [genreId], references: [id])
+  metrics PostMetric[]
+}
+
+model PostMetric {
+  id            String   @id @default(cuid())
+  postId        String
+  accountId     String
+  likes         Int      @default(0)
+  retweets      Int      @default(0)
+  replies       Int      @default(0)
+  impressions   Int      @default(0)
+  bookmarks     Int      @default(0)
+  engagementRate Float?
+  recordedAt    DateTime @default(now())
+
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id])
+}
+
+model BuzzPost {
+  id        String   @id @default(cuid())
+  url       String?
+  content   String
+  accountId String?
+  likes     Int      @default(0)
+  retweets  Int      @default(0)
+  replies   Int      @default(0)
+  analysis  String?
+  patterns  String?
+  tags      String?
+  source    String   @default("manual")
+  createdAt DateTime @default(now())
+
+  account Account? @relation(fields: [accountId], references: [id])
+}
+
+model LearningPattern {
+  id          String   @id @default(cuid())
+  accountId   String?
+  genreId     String?
+  pattern     String
+  weight      Float    @default(1.0)
+  source      String
+  examples    String?
+  strongCount Int      @default(0)
+  weakCount   Int      @default(0)
+  lifeScore   Float    @default(1.0)
+  trend       String   @default("stable")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  account Account? @relation(fields: [accountId], references: [id])
+  genre   Genre?   @relation(fields: [genreId], references: [id])
+}
+
+model AccountNGWord {
+  id        String   @id @default(cuid())
+  accountId String
+  word      String
+  createdAt DateTime @default(now())
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model AppConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model OptimizationLog {
+  id        String   @id @default(cuid())
+  accountId String?
+  insight   String
+  period    String?
+  data      String?
+  createdAt DateTime @default(now())
+}
