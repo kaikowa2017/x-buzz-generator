@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Account {
@@ -17,12 +17,12 @@ model Account {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  posts    Post[]
-  metrics  PostMetric[]
+  posts     Post[]
+  metrics   PostMetric[]
   buzzPosts BuzzPost[]
-  patterns LearningPattern[]
-  genres   AccountGenre[]
-  ngWords  AccountNGWord[]
+  patterns  LearningPattern[]
+  genres    AccountGenre[]
+  ngWords   AccountNGWord[]
 }
 
 model Genre {
@@ -41,45 +41,46 @@ model Genre {
 model AccountGenre {
   accountId String
   genreId   String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  genre     Genre   @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  genre   Genre   @relation(fields: [genreId], references: [id], onDelete: Cascade)
 
   @@id([accountId, genreId])
 }
 
 model Post {
-  id           String    @id @default(cuid())
-  accountId    String
-  genreId      String?
-  content      String
-  imagePrompt  String?
-  videoPrompt  String?
-  status       String    @default("draft")
-  score        Float?
-  postType     String?
-  usedPatterns   String?
-  isTemplate     Boolean   @default(false)
-  templateTitle  String?
-  postedAt       DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  accountId     String
+  genreId       String?
+  content       String
+  imagePrompt   String?
+  videoPrompt   String?
+  status        String    @default("draft")
+  score         Float?
+  postType      String?
+  usedPatterns  String?
+  isTemplate    Boolean   @default(false)
+  templateTitle String?
+  postedAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  account Account  @relation(fields: [accountId], references: [id])
-  genre   Genre?   @relation(fields: [genreId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+  genre   Genre?  @relation(fields: [genreId], references: [id])
   metrics PostMetric[]
 }
 
 model PostMetric {
-  id            String   @id @default(cuid())
-  postId        String
-  accountId     String
-  likes         Int      @default(0)
-  retweets      Int      @default(0)
-  replies       Int      @default(0)
-  impressions   Int      @default(0)
-  bookmarks     Int      @default(0)
+  id             String   @id @default(cuid())
+  postId         String
+  accountId      String
+  likes          Int      @default(0)
+  retweets       Int      @default(0)
+  replies        Int      @default(0)
+  impressions    Int      @default(0)
+  bookmarks      Int      @default(0)
   engagementRate Float?
-  recordedAt    DateTime @default(now())
+  recordedAt     DateTime @default(now())
 
   post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
   account Account @relation(fields: [accountId], references: [id])
@@ -126,7 +127,8 @@ model AccountNGWord {
   accountId String
   word      String
   createdAt DateTime @default(now())
-  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 }
 
 model AppConfig {
