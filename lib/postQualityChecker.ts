@@ -84,13 +84,12 @@ export function checkOverProvocation(text: string): QualityIssue[] {
 
 export async function checkNGWords(text: string, accountId: string): Promise<QualityIssue[]> {
   const ngWords = await prisma.accountNGWord.findMany({ where: { accountId } });
-  const found   = ngWords.filter((w) => text.includes(w.word));
-  if (!found.length) return [];
+const found = ngWords.filter((w: any) => text.includes(w.word));  if (!found.length) return [];
   return [{
     checkId: "ng_words",
     name:    "NGワード検出",
     level:   "blocked",
-    detail:  `アカウント設定のNGワードが含まれています: 「${found.map((w) => w.word).join("」「")}」`,
+    detail:  `アカウント設定のNGワードが含まれています: 「${found.map((w: any) => w.word).join("」「")}」`,
     hint:    "アカウント設定でNGワードを管理できます",
   }];
 }
@@ -144,8 +143,8 @@ export async function checkBrandConsistency(text: string, accountId: string): Pr
 
   const styleKeywords = account.style
     .split(/[、。,.\n]/)
-    .map((s) => s.trim())
-    .filter((s) => s.length >= 4);
+    .map((s: string) => s.trim())
+    .filter((s: string) => s.length >= 4);
 
   if (!styleKeywords.length) return [];
 
@@ -269,9 +268,9 @@ export async function getStructureInsight(accountId: string): Promise<string | n
 
   if (!patterns.length) return null;
 
-  const top    = patterns.filter((p) => p.weight >= 2.0);
-  const rising = patterns.filter((p) => p.trend === "rising");
-  const weak   = patterns.filter((p) => p.trend === "declining");
+  const top    = patterns.filter((p: any) => p.weight >= 2.0);
+  const rising = patterns.filter((p: any) => p.trend === "rising");
+  const weak   = patterns.filter((p: any) => p.trend === "declining");
 
   const parts: string[] = [];
   if (rising.length)  parts.push(`上昇中: ${rising[0].pattern.split(/[：:]/)[0]}`);

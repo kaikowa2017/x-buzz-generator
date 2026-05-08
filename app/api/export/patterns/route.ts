@@ -1,46 +1,56 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-function csv(v: string | number | null | undefined): string {
-  if (v === null || v === undefined) return "";
-  const s = String(v);
-  return s.includes(",") || s.includes('"') || s.includes("\n")
-    ? `"${s.replace(/"/g, '""')}"`
-    : s;
-}
+export async function GET() {
+  try {
+    const patterns = await prisma.learningPattern.findMany({
+      include: {
+        account: true,
+      },
+      orderBy: {
+        weight: "desc",
+      },
+    });
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const accountId = searchParams.get("accountId") || undefined;
+    const header = [
+      "pattern",
+      "weight",
+      "strongCount",
+      "weakCount",
+      "lifeScore",
+      "trend",
+      "source",
+      "account",
+    ];
 
-  const patterns = await prisma.learningPattern.findMany({
-    where: accountId ? { accountId } : {},
-    include: { account: { select: { name: true } } },
-    orderBy: { weight: "desc" },
-  });
+    const rows = patterns.map((p: any) => [
+      p.pattern ?? "",
+      p.weight ?? 0,
+      p.strongCount ?? 0,
+      p.weakCount ?? 0,
+      p.lifeScore ?? 0,
+      p.trend ?? "",
+      p.source ?? "",
+      p.account?.name ?? "グローバル",
+    ]);
 
-  const header = [
-    "パターン", "重み", "強Count", "弱Count",
-    "lifeScore", "trend", "source", "アカウント", "更新日",
-  ].join(",");
+    const csv = [header, ...rows]
+      .map((row) => row.map(String).join(","))
+      .join("\n");
 
-  const rows = patterns.map((p) => [
-    p.pattern,
-    p.weight.toFixed(3),
-    p.strongCount,
-    p.weakCount,
-    p.lifeScore.toFixed(2),
-    p.trend,
-    p.source,
-    p.account?.name ?? "グローバル",
-    new Date(p.updatedAt).toLocaleDateString("ja-JP"),
-  ].map(csv).join(","));
-
-  const body = "﻿" + [header, ...rows].join("\r\n");
-  return new NextResponse(body, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="patterns_${new Date().toISOString().slice(0, 10)}.csv"`,
-    },
-  });
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": "attachment; filename=patterns.csv",
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
 }

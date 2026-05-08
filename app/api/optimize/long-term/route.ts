@@ -38,7 +38,7 @@ export async function GET(req: Request) {
   ]);
 
   // ── PatternLifecycle 計算 ───────────────────────────────────────
-  const metricRows = rawMetrics.map((m) => ({
+  const metricRows = rawMetrics.map((m: any) => ({
     postId:         m.postId,
     engagementRate: m.engagementRate,
     impressions:    m.impressions,
@@ -47,7 +47,7 @@ export async function GET(req: Request) {
   }));
 
   const lifecycles = computePatternLifecycle(
-    patterns.map((p) => ({
+    patterns.map((p: any) => ({
       id: p.id, pattern: p.pattern, weight: p.weight,
       lifeScore: p.lifeScore, trend: p.trend,
     })),
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
   const declining = lifecycles.filter((l) => l.trend === "declining").sort((a, b) => a.lifeScore - b.lifeScore);
 
   // ── ドリフト検出 ────────────────────────────────────────────────
-  const postSummaries = rawMetrics.map((m) => ({
+  const postSummaries = rawMetrics.map((m: any) => ({
     genre:    m.post.genre?.name ?? null,
     postType: m.post.postType,
     recordedAt: m.recordedAt,
@@ -68,7 +68,7 @@ export async function GET(req: Request) {
   const driftWarnings = detectDrift(postSummaries, now);
 
   // ── 次に優先すべき投稿タイプ ────────────────────────────────────
-  const typeMetrics = rawMetrics.map((m) => ({
+  const typeMetrics = rawMetrics.map((m: any) => ({
     postType:      m.post.postType,
     engagementRate: m.engagementRate,
     impressions:   m.impressions,

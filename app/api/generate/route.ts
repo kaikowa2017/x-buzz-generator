@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         orderBy: { weight: "desc" },
         take: 10,
       });
-      patterns = dbPatterns.map((p) => ({ pattern: p.pattern, weight: p.weight }));
+      patterns = dbPatterns.map((p: any) => ({ pattern: p.pattern, weight: p.weight }));
     }
 
     const results = generatePost({ theme, genre: genreName, mood, length, patterns, examples });

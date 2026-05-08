@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     where: { accountId: resolvedAccountId },
   });
 
-  const allRecords: PatternRecord[] = allPatterns.map((p) => ({
+  const allRecords: PatternRecord[] = allPatterns.map((p: any) => ({
     id: p.id,
     pattern: p.pattern,
     weight: p.weight,

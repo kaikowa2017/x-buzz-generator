@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   ]);
 
   const result = optimize({
-    metrics: metrics.map((m) => ({
+    metrics: metrics.map((m: any) => ({
       likes: m.likes,
       retweets: m.retweets,
       replies: m.replies,
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
       createdAt: m.recordedAt,
       genre: m.post.genre?.name,
     })),
-    patterns: patterns.map((p) => ({ pattern: p.pattern, weight: p.weight })),
+    patterns: patterns.map((p: any) => ({ pattern: p.pattern, weight: p.weight })),
     period,
   });
 

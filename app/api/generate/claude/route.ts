@@ -190,10 +190,10 @@ export async function POST(req: Request) {
       take: 5,
     });
     if (learned.length > 0) {
-      usedPatternLabels = learned.map((p) => p.pattern);
-      patterns = "\n\n## 学習済み高エンゲージメントパターン（優先的に活用）\n" +
-        learned.map((p) => `- ${p.pattern}（重み: ${p.weight}）`).join("\n");
-    }
+usedPatternLabels = learned.map((p: { pattern: string }) => p.pattern);
+
+patterns = "\n\n## 学習済み高エンゲージメントパターン（優先的に活用）\n" +
+  learned.map((p: { pattern: string; weight: number }) => "- " + p.pattern + "（重み: " + p.weight + "）").join("\n");    }
   }
 
   // 画像構成ノート

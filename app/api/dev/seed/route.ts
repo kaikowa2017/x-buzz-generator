@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function POST() {
+export async function GET() {
   // ── アカウント ─────────────────────────────────────────────────
   const accountA = await prisma.account.upsert({
     where: { handle: "horror_test" },

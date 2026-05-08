@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   });
 
   const inputs = [
-    ...metrics.map((m) => ({
+    ...metrics.map((m: any) => ({
       content: m.post.content,
       likes: m.likes,
       retweets: m.retweets,
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       genre: m.post.genre?.name,
       source: "post" as const,
     })),
-    ...buzzPosts.map((b) => ({
+    ...buzzPosts.map((b: any) => ({
       content: b.content,
       likes: b.likes,
       retweets: b.retweets,

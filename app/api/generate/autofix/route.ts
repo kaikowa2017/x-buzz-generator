@@ -62,7 +62,7 @@ export async function POST(req: Request) {
           take:    5,
           select:  { content: true },
         });
-        recentSnippets = recent.map((p) => p.content.split("\n")[0]?.slice(0, 50) ?? "");
+        recentSnippets = recent.map((p: { content: string }) => p.content.split("\n")[0]?.slice(0, 50) ?? "");
       } catch { /* DB未接続時はスキップ */ }
     }
 

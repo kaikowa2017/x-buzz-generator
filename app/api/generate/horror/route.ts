@@ -342,10 +342,10 @@ export async function POST(req: Request) {
         where: { accountId }, orderBy: { weight: "desc" }, take: 5,
       });
       if (learned.length > 0) {
-        usedPatternLabels = learned.map((p) => p.pattern);
-        patterns = "\n\n## 学習済みパターン（優先活用）\n" +
-          learned.map((p) => `- ${p.pattern}（重み: ${p.weight}）`).join("\n");
-      }
+usedPatternLabels = learned.map((p: { pattern: string }) => p.pattern);
+
+patterns = "\n\n## 学習済みパターン（優先活用）\n" +
+  learned.map((p: { pattern: string; weight: number }) => "- " + p.pattern + "（重み: " + p.weight + "）").join("\n");      }
     }
 
     /* バズ投稿から構造のみ学習 */
@@ -358,8 +358,7 @@ export async function POST(req: Request) {
         select:  { content: true, likes: true },
       });
       if (buzzPosts.length > 0) {
-        const structures = buzzPosts.map((b) => {
-          const lines = b.content.split(/\n/).filter((l) => l.trim());
+const structures = buzzPosts.map((b: any) => {         const lines = b.content.split(/\n/).filter((l: string) => l.trim());
           const hasContrast  = /でも|実は|意外と|ところが/.test(b.content);
           const hasAmbiguity = /たぶん|気のせい|なんか|よくわからない/.test(b.content);
           const last = b.content.trim().slice(-10);
