@@ -21,37 +21,18 @@ export type GeneratedPost = {
   videoPromptHint: string;
 };
 
-const LENGTHS = {
-  short: 80,
-  medium: 160,
-  long: 280,
-};
+const LENGTHS = { short: 90, medium: 180, long: 320 };
 
 const HOOKS = {
-  horror: [
-    "これ、気づいた瞬間に寒気がした。",
-    "最初はただの偶然だと思ってた。",
-    "今でも説明できない話。",
-    "誰にも信じてもらえないと思う。",
-  ],
-  business: [
-    "伸びる人は、最初にここを見てる。",
-    "9割の人が順番を間違えてる。",
-    "成果が出ない原因は、努力不足じゃない。",
-    "結論、ここを変えるだけで変わる。",
-  ],
-  knowledge: [
-    "実はこれ、かなり重要です。",
-    "知らないと損する話。",
-    "多くの人が勘違いしてます。",
-    "これだけ覚えてください。",
-  ],
+  horror: ["これ、気づいた瞬間に寒気がした。", "最初はただの偶然だと思ってた。", "今でも説明できない話。"],
+  business: ["伸びる人は、最初にここを見てる。", "9割の人が順番を間違えてる。", "成果が出ない原因は、努力不足じゃない。"],
+  knowledge: ["実はこれ、かなり重要です。", "知らないと損する話。", "多くの人が勘違いしてます。"],
 };
 
-const GENRE_TEMPLATES: Record<string, string[]> = {
+const TEMPLATES = {
   horror: [
     "{hook}\n\n{theme}\n\n{detail}\n\nでも一番怖いのは、まだ終わってない気がすること。",
-    "{hook}\n\n{theme}について話します。\n\n{detail}\n\nあなたなら、どうしますか？",
+    "{hook}\n\n{theme}の話。\n\n{detail}\n\nあなたなら、気づけますか？",
   ],
   business: [
     "{hook}\n\n{theme}で大事なのは、才能ではなく設計です。\n\n{detail}\n\nまずは1つだけ変えてみてください。",
@@ -63,54 +44,77 @@ const GENRE_TEMPLATES: Record<string, string[]> = {
   ],
 };
 
-function pickRandom<T>(arr: T[]): T {
+function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getGenre(inputGenre: string): "horror" | "business" | "knowledge" {
-  if (inputGenre.includes("horror") || inputGenre.includes("怖")) return "horror";
-  if (inputGenre.includes("business") || inputGenre.includes("ビジネス")) return "business";
+function getGenre(genre: string): keyof typeof TEMPLATES {
+  if (/horror|ホラー|怪談|怖|恐怖/.test(genre)) return "horror";
+  if (/business|ビジネス|副業|仕事|起業/.test(genre)) return "business";
   return "knowledge";
 }
 
-function buildDetail(input: GenerateInput): string {
-  if (input.examples?.length) return pickRandom(input.examples);
+function buildDetail(input: GenerateInput, genre: keyof typeof TEMPLATES): string {
+  if (input.examples?.length) return pick(input.examples);
 
-  if (getGenre(input.genre) === "horror") {
-    return "小さな違和感を無視したせいで、あとから全部つながって見えてきた。";
+  if (genre === "horror") return "小さな違和感を無視したせいで、あとから全部つながって見えてきた。";
+  if (genre === "business") return "作業量を増やす前に、誰に何を届けるかを決めること。";
+  return "表面的なテクニックより、なぜそうなるのかを理解すること。";
+}
+
+function applyStyle(content: string, style?: string): string {
+  if (!style) return content;
+
+  if (style.includes("短文")) {
+    return content.split("\n").filter(Boolean).slice(0, 5).join("\n\n");
   }
 
-  if (getGenre(input.genre) === "business") {
-    return "最初にやるべきことは、作業量を増やすことではなく、勝ち筋を決めること。";
+  if (style.includes("カジュアル")) {
+    return content.replaceAll("です。", "です。").replaceAll("ます。", "ます。");
   }
 
-  return "ポイントは、表面的なテクニックではなく、なぜそうなるのかを理解すること。";
+  if (style.includes("冷静") || style.includes("論理")) {
+    return content + "\n\n要するに、感覚ではなく構造を見ることが大事です。";
+  }
+
+  return content;
 }
 
 function applyPatterns(content: string, patterns?: PatternHint[]): string {
   if (!patterns?.length) return content;
 
-  const top = [...patterns]
+  const strong = [...patterns]
+    .filter((p) => !p.pattern.startsWith("NGワード禁止"))
     .sort((a, b) => b.weight - a.weight)
     .slice(0, 2)
     .map((p) => p.pattern);
 
-  if (!top.length) return content;
+  if (!strong.length) return content;
+  return `${content}\n\n${strong.join("\n")}`;
+}
 
-  return `${content}\n\n参考パターン：${top.join(" / ")}`;
+function applyNgWords(content: string, patterns?: PatternHint[]): string {
+  const ng = patterns
+    ?.filter((p) => p.pattern.startsWith("NGワード禁止"))
+    .flatMap((p) => p.pattern.replace("NGワード禁止:", "").split("、").map((w) => w.trim()))
+    .filter(Boolean) ?? [];
+
+  let result = content;
+  for (const word of ng) {
+    result = result.replaceAll(word, "○○");
+  }
+  return result;
 }
 
 export function generatePost(input: GenerateInput): GeneratedPost[] {
   const genre = getGenre(input.genre);
-  const templates = GENRE_TEMPLATES[genre];
   const maxLen = LENGTHS[input.length ?? "medium"];
-
   const results: GeneratedPost[] = [];
 
   for (let i = 0; i < 3; i++) {
-    const hook = pickRandom(HOOKS[genre]);
-    const detail = buildDetail(input);
-    const template = pickRandom(templates);
+    const hook = pick(HOOKS[genre]);
+    const detail = buildDetail(input, genre);
+    const template = pick(TEMPLATES[genre]);
 
     let content = template
       .replaceAll("{hook}", hook)
@@ -118,17 +122,18 @@ export function generatePost(input: GenerateInput): GeneratedPost[] {
       .replaceAll("{detail}", detail);
 
     content = applyPatterns(content, input.patterns);
+    content = applyStyle(content, input.style);
+    content = applyNgWords(content, input.patterns);
 
     if (content.length > maxLen) {
       content = content.slice(0, maxLen - 1) + "…";
     }
 
-    const patternBonus =
-      input.patterns?.reduce((sum, p) => sum + p.weight * 0.03, 0) ?? 0;
+    const patternBonus = input.patterns?.reduce((s, p) => s + p.weight * 0.025, 0) ?? 0;
 
     results.push({
       content,
-      score: Math.min(0.72 + Math.random() * 0.18 + patternBonus, 1),
+      score: Math.min(0.7 + Math.random() * 0.2 + patternBonus, 1),
       tags: [genre, input.theme],
       imagePromptHint: `${input.theme}, ${genre} style, dramatic lighting`,
       videoPromptHint: `Short vertical video about ${input.theme}, ${genre} mood, cinematic`,
